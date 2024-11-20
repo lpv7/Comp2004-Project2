@@ -1,3 +1,5 @@
+//GITHUB RULEZ
+
 //imports and initializations
 const express = require("express");
 const server = express();

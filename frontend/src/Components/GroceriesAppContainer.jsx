@@ -1,3 +1,5 @@
+//GITHUB RULEZ
+
 //IMPORTS
 import { useState, useEffect } from "react";
 import CartContainer from "./CartContainer";
