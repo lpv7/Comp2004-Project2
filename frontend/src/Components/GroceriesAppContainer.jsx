@@ -6,25 +6,41 @@ import CartContainer from "./CartContainer";
 import ProductsContainer from "./ProductsContainer";
 import NavBar from "./NavBar";
 import axios from "axios";
+import ProductsForm from "./ProductsForm";
 
 //MAIN FUNCTION
 export default function GroceriesAppContainer({ products }) {
   //STATES
+  //initial state for store, list of available items
   const [productQuantity, setProductQuantity] = useState(
     products.map((product) => ({ id: product.id, quantity: 0 }))
   );
 
+  //state for cart
   const [cartList, setCartList] = useState([]);
+
+  //state for products list, now from mongo instead of our regular data file.
   const [productList, setProductList] = useState([]);
 
-  //USEEFFECT
+  //state for FORM, to add new products to the store! Note the initial state
+  //serves as the prompts for users to enter the relevant information
+  const [addNewProduct, setAddNewProduct] = useState({
+    productName: "Product Name",
+    brand: "Brand",
+    image: "Image Link",
+    price: "Price",
+  });
+
+  //USEEFFECT (see handler below) This will run only initially (at the mount
+  //stage), per the syntax handleProductsFromDB(), [] //the callback
+  //function, then []
   useEffect(() => {
     handleProductsFromDB();
   }, []);
 
   //HANDLERS
 
-  //handle to grab from Database
+  //handle to grab from Database, and display in backend, per effect above (under states)
   const handleProductsFromDB = async () => {
     try {
       await axios
@@ -35,6 +51,34 @@ export default function GroceriesAppContainer({ products }) {
     }
   };
 
+  //handle to allow us to type input into the form (and hopefully when editing products in the store);
+  //name in e.target.name refers to the name="" section of the input tag in HTML (See Form Component)
+  const handleOnChange = (e) => {
+    setAddNewProduct(() => {
+      return {
+        ...addNewProduct,
+        [e.target.name]: e.target.value,
+      };
+    });
+  };
+
+  //handle submit new info on form; naming matches useState above for addNewProduct.
+  //The alert and message (everything in between the two `) is a placeholder for now
+  const handleOnSubmit = (e) => {
+    e.preventDefault();
+    alert(
+      `Product Name: ${addNewProduct.productName}, 
+      Brand: ${addNewProduct.brand}, 
+      Image Link: ${addNewProduct.image}, 
+      Price: ${addNewProduct.price}`
+    );
+  };
+
+  //handleAddQuantity, handler will be sent all the way down to QuantityCounter component,
+  //where like its component home, handleAddQuantity will function with the cart
+  //(per mode ==== "cart") and the store itself (per mode === "product"). Each mode indicates
+  //which "list" (item counter) will be updated (cartList or productQuantity), but otherwise
+  //the functionality within each mode is the same.
   const handleAddQuantity = (productId, mode) => {
     if (mode === "cart") {
       const newCartList = cartList.map((product) => {
@@ -57,6 +101,12 @@ export default function GroceriesAppContainer({ products }) {
     }
   };
 
+  //handleRemoveQuantity. Very similar to its sibling above, handleAddQuantity,
+  //but here we must enforce a lower limit, as this particular online store does
+  //not allow the customer to add a negative quantity of items to the cart (or
+  //zero items, see handleAddToCart). Within cart, if an item amount is above 1
+  //the amount will be reduced. Currently no functionality to remove from cart by
+  //reducing to zero, but remove and empty cart buttons work (see handles below)
   const handleRemoveQuantity = (productId, mode) => {
     if (mode === "cart") {
       const newCartList = cartList.map((product) => {
@@ -79,6 +129,14 @@ export default function GroceriesAppContainer({ products }) {
     }
   };
 
+  //handleAddToCart: The big one, adding selected items from store to the cart,
+  //to be rendered through CartContainer and CartCard. Grabs item ID and quantity,
+  //sends as cartList then checks if the item is already in the cart (notice we've
+  //defined productInCart) to search by id through the existing cart items); if so,
+  //the new quantity is added to the existing quantity on the existing item;
+  //otherwise a new card for the item is rendered (note the push function used!!!).
+  //If the user attempts to add 0 of any item to the cart, they will be yelled at
+  //via popup!
   const handleAddToCart = (productId) => {
     const product = products.find((product) => product.id === productId);
     const pQuantity = productQuantity.find(
@@ -98,11 +156,14 @@ export default function GroceriesAppContainer({ products }) {
     setCartList(newCartList);
   };
 
+  //handleRemoveFromCart uses filter to take out the selected id...by selecting all
+  //other ids and only including those in the new array.
   const handleRemoveFromCart = (productId) => {
     const newCartList = cartList.filter((product) => product.id !== productId);
     setCartList(newCartList);
   };
 
+  //handleClearCart sets cartList to an empty array, []
   const handleClearCart = () => {
     setCartList([]);
   };
@@ -111,6 +172,11 @@ export default function GroceriesAppContainer({ products }) {
     <div>
       <NavBar quantity={cartList.length} />
       <div className="GroceriesApp-Container">
+        <ProductsForm
+          addNewProduct={addNewProduct}
+          handleOnChange={handleOnChange}
+          handleOnSubmit={handleOnSubmit}
+        />
         <ProductsContainer
           products={productList}
           handleAddQuantity={handleAddQuantity}

@@ -1,21 +1,21 @@
 //GITHUB RULEZ
 
 //imports and initializations
-const express = require("express");
+const express = require("express"); //express server
 const server = express();
 const port = 3000; //old reliable
-const mongoose = require("mongoose");
+const mongoose = require("mongoose"); //mongo database
 const cors = require("cors");
-const Product = require("./models/product");
+const Product = require("./models/product"); //see product.js, basically formatting data that will be sent to mongo
 require("dotenv").config();
-const { DB_URI } = process.env;
+const { DB_URI } = process.env; //URI: Universal Resource Indicator. See .env file
 
 //MIDDLEWARE
-server.use(express.json());
+server.use(express.json()); //change (convert?) everything we will use into json (per lecture 11/11)
 server.use(cors());
-server.use(express.urlencoded({ extended: true })); //deprecated??
+server.use(express.urlencoded({ extended: true })); //deprecated?? allows server (computer) to read/see information from URLs (per lecture 11/11)
 
-//DB connect and server start
+//DB connect and server start. Connect to server via link in DB_URI (in .env)
 mongoose
   .connect(DB_URI)
   .then((res) => {
