@@ -1,5 +1,5 @@
 //GITHUB RULEZ
-
+//MINE
 //imports and initializations
 const express = require("express"); //express server
 const server = express();
@@ -49,8 +49,8 @@ server.post("/add-product", async (request, response) => {
     productName,
     brand,
     image,
-    price,
-    quantity: 0,
+    price, // quantity: 0,
+    id: crypto.randomUUID(),
   });
   try {
     await newProduct.save();
@@ -67,18 +67,25 @@ server.patch("/products/:id", async (request, response) => {
   const { productName, brand, image, price } = request.body;
   const objectId = new mongoose.Types.ObjectId(id); // Convert id to Mongoose ObjectId
   try {
-    await Contact.findByIdAndUpdate(objectId, {
+    await Product.findById(objectId).then((result) => {
+      console.log(result);
+    });
+  } catch (error) {
+    response.status(404).json({ message: "Can't find it" });
+  }
+  try {
+    await Product.findByIdAndUpdate(objectId, {
       productName,
       brand,
       image,
       price,
-    }).then((response) => {
-      console.log(response);
+      id: crypto.randomUUID(),
+    }).then((result) => {
+      console.log(result);
+      response.status(200).json({ message: "Product updated successfully" });
     });
-    await response
-      .status(200)
-      .json({ message: "Contact updated successfully" });
   } catch (error) {
+    console.log(error.message);
     response.status(404).json({ message: error.message });
   }
 });
@@ -91,6 +98,7 @@ server.delete("/products/:id", async (request, response) => {
     await Product.findByIdAndDelete(objectId); //What a usefull function!!!
     response.status(200).json({ message: "Product deleted :(" });
   } catch (error) {
+    console.log(error.message);
     response.status(404).json({ message: error.message });
   }
 });

@@ -1,5 +1,5 @@
 import QuantityCounter from "./QuantityCounter";
-
+//MINE
 export default function ProductCard({
   productName,
   brand,
@@ -12,6 +12,7 @@ export default function ProductCard({
   handleDelete,
   handleAddToCart,
   id,
+  _id,
 }) {
   return (
     <div className="ProductCard">
@@ -28,8 +29,12 @@ export default function ProductCard({
       />
       <h3>{price}</h3>
       <button onClick={() => handleAddToCart(id)}>Add to Cart</button>
-      <button onClick={() => handleEdit(product)}>Edit</button>
-      <button onClick={() => handleDelete(id)}>Delete</button>
+      <button
+        onClick={() => handleEdit({ productName, brand, image, price, _id })}
+      >
+        Edit
+      </button>
+      <button onClick={() => handleDelete(_id)}>Delete</button>
     </div>
   );
 }

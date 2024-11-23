@@ -1,5 +1,5 @@
 //GITHUB RULEZ
-
+//MINE
 //IMPORTS
 import { useState, useEffect } from "react";
 import CartContainer from "./CartContainer";
@@ -9,26 +9,26 @@ import axios from "axios";
 import ProductsForm from "./ProductsForm";
 
 //MAIN FUNCTION
-export default function GroceriesAppContainer({ products }) {
+export default function GroceriesAppContainer() {
   //STATES
+  //state for products list, now from mongo instead of our regular data file.
+  const [productList, setProductList] = useState([]);
+
   //state for item count, used both in store and cart
   const [productQuantity, setProductQuantity] = useState(
-    products.map((product) => ({ id: product.id, quantity: 0 }))
+    productList.map((product) => ({ id: product.id, quantity: 0 }))
   );
 
   //state for cart
   const [cartList, setCartList] = useState([]);
 
-  //state for products list, now from mongo instead of our regular data file.
-  const [productList, setProductList] = useState([]);
-
   //state for FORM, to add new products to the store! Note the initial state
   //serves as the prompts for users to enter the relevant information
   const [formData, setFormData] = useState({
-    productName: "Product Name",
-    brand: "Brand",
-    image: "Image Link",
-    price: "Price",
+    productName: "",
+    brand: "",
+    image: "",
+    price: "",
   });
 
   //postResponse if successful triggers useEffect to run again (see below),
@@ -38,7 +38,7 @@ export default function GroceriesAppContainer({ products }) {
   //indicates if we are editing or creating a new product; dictates patch or post
   const [isEditing, setIsEditing] = useState(false);
 
-  // // React Hook Form. NEEDED?
+  // // React Hook Form. NEEDED for VALIDATION
   // const {
   //   register,
   //   handleSubmit,
@@ -50,16 +50,23 @@ export default function GroceriesAppContainer({ products }) {
   //existing one is edited
   useEffect(() => {
     handleProductsFromDB();
-  });
+  }, [postResponse]);
 
   //HANDLERS
+  //handleInitProductQuantity; sets initial quantity of products to 0, including (and most importantly) newly added ones.
+  const handleInitProductQuantity = (produit) => {
+    return produit.map((product) => ({ id: product.id, quantity: 0 }));
+  };
 
-  //handle to grab from Database, and display in backend, per effect above (under states)
+  //handle to grab from Database, and display in backend, per effect above (under states). Note that due to the convoluted
+  //creation of this project, we have to call setProductQuantity and our handler handleInitProductQuantity to successfully
+  //initialize the products and their counts.
   const handleProductsFromDB = async () => {
     try {
-      await axios
-        .get("http://localhost:3000/products")
-        .then((result) => setProductList(result.data));
+      await axios.get("http://localhost:3000/products").then((result) => {
+        setProductList(result.data);
+        setProductQuantity(handleInitProductQuantity(result.data));
+      });
     } catch (error) {
       console.log(error.message);
     }
@@ -80,7 +87,7 @@ export default function GroceriesAppContainer({ products }) {
   //handle submit new info on form; naming matches useState above for formData.
   //
   const handleOnSubmit = async (e) => {
-    e.preventDefault; // YOU HAVE TO REMOVE THE BRACKETS FOR THIS TO WORK!!
+    e.preventDefault(); // YOU HAVE TO REMOVE THE BRACKETS FOR THIS TO WORK WITH VALIDATION, but LEAVE for now
     try {
       if (isEditing) {
         // If isEditing is true, then update the product
@@ -101,13 +108,14 @@ export default function GroceriesAppContainer({ products }) {
         await axios
           .post("http://localhost:3000/add-product", formData)
           .then((response) => {
+            console.log(response);
             setPostResponse(response.data.message);
           });
         setFormData({
-          productName: "Product Name",
-          brand: "Brand",
-          image: "Image Link",
-          price: "Price",
+          productName: "",
+          brand: "",
+          image: "",
+          price: "",
         });
       }
     } catch (error) {
@@ -142,7 +150,7 @@ export default function GroceriesAppContainer({ products }) {
     }
   };
 
-  //handle delete: handles delete products from the database by ID
+  //handle delete: handles deleting products from the database by ID
   const handleDelete = async (id) => {
     try {
       await axios
@@ -221,7 +229,7 @@ export default function GroceriesAppContainer({ products }) {
   //If the user attempts to add 0 of any item to the cart, they will be yelled at
   //via popup!
   const handleAddToCart = (productId) => {
-    const product = products.find((product) => product.id === productId);
+    const product = productList.find((product) => product.id === productId);
     const pQuantity = productQuantity.find(
       (product) => product.id === productId
     );
