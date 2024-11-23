@@ -8,6 +8,8 @@ export default function ProductCard({
   productQuantity,
   handleAddQuantity,
   handleRemoveQuantity,
+  handleEdit,
+  handleDelete,
   handleAddToCart,
   id,
 }) {
@@ -16,16 +18,7 @@ export default function ProductCard({
       <h3>{productName}</h3>
       <img src={image} alt="" />
       <h4>{brand}</h4>
-      {/* <div className="ProductQuantityDiv">
-        <div onClick={() => handleRemoveQuantity(id)} className="QuantityBtn">
-          <p>➖</p>
-        </div>
-
-        <p>{productQuantity}</p>
-        <div onClick={() => handleAddQuantity(id)} className="QuantityBtn">
-          <p>➕</p>
-        </div>
-      </div> */}
+      <br />
       <QuantityCounter
         handleAddQuantity={handleAddQuantity}
         productQuantity={productQuantity}
@@ -35,6 +28,8 @@ export default function ProductCard({
       />
       <h3>{price}</h3>
       <button onClick={() => handleAddToCart(id)}>Add to Cart</button>
+      <button onClick={() => handleEdit(product)}>Edit</button>
+      <button onClick={() => handleDelete(id)}>Delete</button>
     </div>
   );
 }

@@ -33,10 +33,64 @@ server.get("/", (request, response) => {
   response.send("LIVE!");
 });
 
+//render existing product list. That find function is so useful!
 server.get("/products", async (request, response) => {
   try {
     await Product.find().then((result) => response.status(200).send(result));
   } catch (error) {
     console.log(error.message);
+  }
+});
+
+//once a new product has been successfully added via the form, add (post) to the existing list
+server.post("/add-product", async (request, response) => {
+  const { productName, brand, image, price, quantity } = request.body;
+  const newProduct = new Product({
+    productName,
+    brand,
+    image,
+    price,
+    quantity: 0,
+  });
+  try {
+    await newProduct.save();
+    response.status(201).json({ message: "Product added successfully!" });
+  } catch (error) {
+    response.status(400).json({ message: error.message });
+  }
+});
+
+//patch, ie update an existing entry, ie product!
+//findByIdAndUpdate? AMAZING! Courtesy of Mongoose
+server.patch("/products/:id", async (request, response) => {
+  const { id } = request.params;
+  const { productName, brand, image, price } = request.body;
+  const objectId = new mongoose.Types.ObjectId(id); // Convert id to Mongoose ObjectId
+  try {
+    await Contact.findByIdAndUpdate(objectId, {
+      productName,
+      brand,
+      image,
+      price,
+    }).then((response) => {
+      console.log(response);
+    });
+    await response
+      .status(200)
+      .json({ message: "Contact updated successfully" });
+  } catch (error) {
+    response.status(404).json({ message: error.message });
+  }
+});
+
+//Delete. Bye bye product :(
+server.delete("/products/:id", async (request, response) => {
+  const { id } = request.params;
+  const objectId = new mongoose.Types.ObjectId(id); //Convert id to Mongoose Object ID
+  try {
+    await Product.findByIdAndDelete(objectId); //What a usefull function!!!
+    response.status(200).json({ message: "Product deleted :(" });
+  } catch (error) {
+    response.status(404).json({ message: error.message });
   }
 });

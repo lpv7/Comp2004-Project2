@@ -6,6 +6,8 @@ export default function ProductsContainer({
   handleRemoveQuantity,
   handleAddToCart,
   productQuantity,
+  handleEdit,
+  handleDelete,
 }) {
   return (
     <div className="ProductsContainer">
@@ -16,6 +18,8 @@ export default function ProductsContainer({
           handleAddQuantity={handleAddQuantity}
           handleRemoveQuantity={handleRemoveQuantity}
           handleAddToCart={handleAddToCart}
+          handleEdit={handleEdit}
+          handleDelete={handleDelete}
           productQuantity={
             productQuantity.find((p) => p.id === product.id).quantity
           }

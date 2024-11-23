@@ -11,7 +11,7 @@ import ProductsForm from "./ProductsForm";
 //MAIN FUNCTION
 export default function GroceriesAppContainer({ products }) {
   //STATES
-  //initial state for store, list of available items
+  //state for item count, used both in store and cart
   const [productQuantity, setProductQuantity] = useState(
     products.map((product) => ({ id: product.id, quantity: 0 }))
   );
@@ -24,19 +24,33 @@ export default function GroceriesAppContainer({ products }) {
 
   //state for FORM, to add new products to the store! Note the initial state
   //serves as the prompts for users to enter the relevant information
-  const [addNewProduct, setAddNewProduct] = useState({
+  const [formData, setFormData] = useState({
     productName: "Product Name",
     brand: "Brand",
     image: "Image Link",
     price: "Price",
   });
 
-  //USEEFFECT (see handler below) This will run only initially (at the mount
-  //stage), per the syntax handleProductsFromDB(), [] //the callback
-  //function, then []
+  //postResponse if successful triggers useEffect to run again (see below),
+  //showing the updated products list
+  const [postResponse, setPostResponse] = useState("");
+
+  //indicates if we are editing or creating a new product; dictates patch or post
+  const [isEditing, setIsEditing] = useState(false);
+
+  // // React Hook Form. NEEDED?
+  // const {
+  //   register,
+  //   handleSubmit,
+  //   formState: { errors },
+  // } = useForm();
+
+  //USEEFFECT (see handler below) This will run initially (at the mount
+  //stage), and each time a new product is added or removed, or an
+  //existing one is edited
   useEffect(() => {
     handleProductsFromDB();
-  }, []);
+  });
 
   //HANDLERS
 
@@ -52,26 +66,95 @@ export default function GroceriesAppContainer({ products }) {
   };
 
   //handle to allow us to type input into the form (and hopefully when editing products in the store);
-  //name in e.target.name refers to the name="" section of the input tag in HTML (See Form Component)
+  //name in e.target.name refers to the name="" section of the input tag in HTML for each of productName,
+  //brand, image, price(See Form Component)
   const handleOnChange = (e) => {
-    setAddNewProduct(() => {
+    setFormData(() => {
       return {
-        ...addNewProduct,
+        ...formData,
         [e.target.name]: e.target.value,
       };
     });
   };
 
-  //handle submit new info on form; naming matches useState above for addNewProduct.
-  //The alert and message (everything in between the two `) is a placeholder for now
-  const handleOnSubmit = (e) => {
-    e.preventDefault();
-    alert(
-      `Product Name: ${addNewProduct.productName}, 
-      Brand: ${addNewProduct.brand}, 
-      Image Link: ${addNewProduct.image}, 
-      Price: ${addNewProduct.price}`
-    );
+  //handle submit new info on form; naming matches useState above for formData.
+  //
+  const handleOnSubmit = async (e) => {
+    e.preventDefault; // YOU HAVE TO REMOVE THE BRACKETS FOR THIS TO WORK!!
+    try {
+      if (isEditing) {
+        // If isEditing is true, then update the product
+        try {
+          await handleUpdate(formData._id); // Update the product
+          await setIsEditing(false); // Set isEditing to false
+          await setFormData({
+            productName: "",
+            brand: "",
+            image: "",
+            price: "",
+          });
+        } catch (error) {
+          console.log(error.message);
+        }
+      } else {
+        // If isEditing is false, then add the contact
+        await axios
+          .post("http://localhost:3000/add-product", formData)
+          .then((response) => {
+            setPostResponse(response.data.message);
+          });
+        setFormData({
+          productName: "Product Name",
+          brand: "Brand",
+          image: "Image Link",
+          price: "Price",
+        });
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  //handleEdit: handles editing product information with the form
+  const handleEdit = async (product) => {
+    setIsEditing(true);
+    setFormData({
+      productName: product.productName,
+      brand: product.brand,
+      image: product.image,
+      price: product.price,
+      _id: product._id,
+    });
+  };
+
+  //handleUpdate: handles updating product info in the database by id
+  const handleUpdate = async (id) => {
+    try {
+      await axios
+        .patch(`http://localhost:3000/products/${id}`, formData)
+        .then((response) => {
+          setPostResponse(response.data.message);
+        });
+      // handleContactsDB();
+      // setPostResponse("Contact updated successfully");
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  //handle delete: handles delete products from the database by ID
+  const handleDelete = async (id) => {
+    try {
+      await axios
+        .delete(`http://localhost:3000/products/${id}`)
+        .then((response) => {
+          setPostResponse(response.data.message);
+        });
+      // handleContactsDB();
+      // setPostResponse("Contact deleted successfully");
+    } catch (error) {
+      console.log(error.message);
+    }
   };
 
   //handleAddQuantity, handler will be sent all the way down to QuantityCounter component,
@@ -173,9 +256,11 @@ export default function GroceriesAppContainer({ products }) {
       <NavBar quantity={cartList.length} />
       <div className="GroceriesApp-Container">
         <ProductsForm
-          addNewProduct={addNewProduct}
+          formData={formData}
           handleOnChange={handleOnChange}
           handleOnSubmit={handleOnSubmit}
+          isEditing={isEditing}
+          //other stuff (see ContactsApp) for validation
         />
         <ProductsContainer
           products={productList}
@@ -183,6 +268,8 @@ export default function GroceriesAppContainer({ products }) {
           handleRemoveQuantity={handleRemoveQuantity}
           handleAddToCart={handleAddToCart}
           productQuantity={productQuantity}
+          handleEdit={handleEdit}
+          handleDelete={handleDelete}
         />
         <CartContainer
           cartList={cartList}

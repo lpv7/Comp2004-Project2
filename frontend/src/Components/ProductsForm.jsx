@@ -3,7 +3,7 @@
 //"The Office".
 
 export default function ProductsForm({
-  addNewProduct,
+  formData,
   handleOnChange,
   handleOnSubmit,
 }) {
@@ -18,7 +18,7 @@ export default function ProductsForm({
           type="text"
           name="productName"
           id="productName"
-          value={addNewProduct.productName}
+          value={formData.productName}
           onChange={handleOnChange}
         />
         <br />
@@ -27,7 +27,7 @@ export default function ProductsForm({
           type="text"
           name="brand"
           id="brand"
-          value={addNewProduct.brand}
+          value={formData.brand}
           onChange={handleOnChange}
         />
         <br />
@@ -36,7 +36,7 @@ export default function ProductsForm({
           type="text"
           name="image"
           id="image"
-          value={addNewProduct.image}
+          value={formData.image}
           onChange={handleOnChange}
         />
         <br />
@@ -45,7 +45,7 @@ export default function ProductsForm({
           type="text"
           name="price"
           id="price"
-          value={addNewProduct.price}
+          value={formData.price}
           onChange={handleOnChange}
         />
         <br />
