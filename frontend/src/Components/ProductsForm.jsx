@@ -1,7 +1,6 @@
 //Form to submit new products; Top h1 reads "Add a New Product Here!" as opposed
 //to "Product Form" because "Product Form" reads like "It Is Your Birthday" from
 //"The Office".
-//MINE
 
 export default function ProductsForm({
   formData,

@@ -1,5 +1,5 @@
 //GITHUB RULEZ
-//MINE
+
 //IMPORTS
 import { useState, useEffect } from "react";
 import CartContainer from "./CartContainer";
@@ -123,7 +123,7 @@ export default function GroceriesAppContainer() {
     }
   };
 
-  //handleEdit: handles editing product information with the form
+  //handleEdit: handles editing product information with the form. Note _id is from Mongo
   const handleEdit = async (product) => {
     setIsEditing(true);
     setFormData({

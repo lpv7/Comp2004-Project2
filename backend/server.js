@@ -1,5 +1,5 @@
 //GITHUB RULEZ
-//MINE
+
 //imports and initializations
 const express = require("express"); //express server
 const server = express();

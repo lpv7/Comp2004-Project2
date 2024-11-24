@@ -1,5 +1,6 @@
 import ProductCard from "./ProductCard";
-//MINE
+//This is essentially just a "waystation" component, serving as a passing through point for props and the main
+//container for all product cards, ie the items that make up the store. Note the use of map and find below.
 export default function ProductsContainer({
   products,
   handleAddQuantity,
